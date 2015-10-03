@@ -166,8 +166,11 @@ void *pi_recv_func(void *arg)
 			pthread_exit(&pi_recv_func);
 		}
 		else if( pi_from_host==true && nu>0)
-		send_func(recv_text);
-		printf("pi-> %s\n",recv_text);
+		{
+			pc_send_func(recv_text);
+			printf("pi-> %s\n",recv_text);
+			memset(recv_text, 0x0, strlen(recv_text));
+		}	
 	}
 }
 
@@ -188,12 +191,31 @@ void *pc_recv_func(void *arg)
 			pthread_exit(&pc_recv_func);
 		}
 		else if( pc_from_host==true && nu>0)
-		printf("pc-> %s\n",recv_text);
+		{
+			pi_send_func(recv_text);
+			printf("pc-> %s\n",recv_text);
+			memset(recv_text, 0x0, strlen(recv_text));
+		}
 	}
 }
 
 /* Send function,send message to client */
-void send_func(const char * send_text)
+void pi_send_func(const char * send_text)
+{
+        /* If there is no text,continue */
+        if(strlen(send_text)==1)
+                return;
+        if( !pi_from_host ) printf("--> Waiting the client to connect!\n");
+        /* Send message */
+        if(pi_from_host && send(pi_cl_sockfd,send_text,strlen(send_text),0)<0)
+        {
+                printf("S send error");
+                exit(1);
+        }
+}
+
+/* Send function,send message to client */
+void pc_send_func(const char * send_text)
 {
 	/* If there is no text,continue */
 	if(strlen(send_text)==1)
@@ -207,26 +229,26 @@ void send_func(const char * send_text)
 	}
 }
 
-void send_text()
-{
-	char *text;
-	/* Socket creating has succeed ,so send message */
-	text=(char *)malloc(MAXSIZE);
-    scanf("%s",text);
-	if(text==NULL)
-	{
-		printf("Malloc error!\n");
-		exit(1);
-	}
-	/* If there is no input,do nothing but return */
-	if(strcmp(text,"")!=0)
-	{
-		send_func(text);
-	}
-	else
-		printf("The message can not be empty ...\n");
-	free(text);
-}
+//void send_text()
+//{
+//	char *text;
+//	/* Socket creating has succeed ,so send message */
+//	text=(char *)malloc(MAXSIZE);
+//    scanf("%s",text);
+//	if(text==NULL)
+//	{
+//		printf("Malloc error!\n");
+//		exit(1);
+//	}
+//	/* If there is no input,do nothing but return */
+//	if(strcmp(text,"")!=0)
+//	{
+//		send_func(text);
+//	}
+//	else
+//		printf("The message can not be empty ...\n");
+//	free(text);
+//}
 
 void startsocket(void)
 {

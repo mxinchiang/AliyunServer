@@ -27,6 +27,7 @@ void *pc_recv_func(void *arg);
 void *pi_socket(void *arg);
 void *pc_socket(void *arg);
 void send_text(void);
-void send_func(const char *);
+void pi_send_func(const char *);
+void pc_send_func(const char *);
 void startsocket(void);
 #endif
